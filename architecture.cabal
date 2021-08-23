@@ -1,0 +1,64 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 8374a79dca71464fe0b67b28b59ccc0d04cc7fa8810d42f1866409d20da9bad6
+
+name:           architecture
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/TomLippincott/architecture#readme>
+homepage:       https://github.com/githubuser/architecture#readme
+bug-reports:    https://github.com/githubuser/architecture/issues
+author:         Tom Lippincott
+maintainer:     tom.lippincott@gmail.com
+copyright:      2021 Tom Lippincott
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/architecture
+  
+library
+  exposed-modules:
+        Architecture
+      , Architecture.Examples
+      , Architecture.Examples.Slab
+      , Architecture.Examples.Pergola
+    
+  other-modules:
+      Paths_architecture
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , diagrams ==1.4
+    , split
+    , diagrams-lib
+    , diagrams-svg
+    , diagrams-povray   
+  default-language: Haskell2010
+
+executable render
+  main-is: Main.hs
+  other-modules:
+      Paths_architecture
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , split
+    , diagrams ==1.4
+    , diagrams-lib
+    , diagrams-svg
+    , architecture
+    , diagrams-povray
+    , process    
+  default-language: Haskell2010
