@@ -30,8 +30,7 @@ library
         Architecture
       , Architecture.Examples
       , Architecture.Examples.Slab
-      , Architecture.Examples.Pergola
-    
+      , Architecture.Examples.Pergola    
   other-modules:
       Paths_architecture
   hs-source-dirs:
@@ -44,6 +43,12 @@ library
     , diagrams-svg
     , diagrams-povray   
   default-language: Haskell2010
+  default-extensions:
+       FlexibleContexts
+       NoMonomorphismRestriction
+       GADTs
+       PostfixOperators
+       TypeFamilies
 
 executable render
   main-is: Main.hs
@@ -60,5 +65,20 @@ executable render
     , diagrams-svg
     , architecture
     , diagrams-povray
-    , process    
+    , process
+    , text
+    , directory
+    , optparse-generic
   default-language: Haskell2010
+  default-extensions:
+        OverloadedStrings
+        FlexibleContexts
+        NoMonomorphismRestriction
+        GADTs
+        DataKinds
+        TypeOperators
+        FlexibleInstances
+        DeriveGeneric
+        StandaloneDeriving
+        PostfixOperators
+        OverloadedStrings

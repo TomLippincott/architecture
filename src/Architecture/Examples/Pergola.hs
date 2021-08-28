@@ -1,10 +1,3 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
-{-# LANGUAGE FlexibleContexts          #-}
-{-# LANGUAGE TypeFamilies              #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE PostfixOperators #-}
-
-
 module Architecture.Examples.Pergola
   (
     pergola
@@ -19,19 +12,54 @@ import Debug.Trace (traceShowId)
 import Diagrams.Backend.POVRay hiding (light)
 
 foundationWidth = l 18 0 0
-foundationDepth = l 26 0 0
+foundationDepth = l 24 0 0
+sidewalkWidth = l 3 6 0
 
-viewerCenteringWidth = l 0 0 0
-viewerCenteringHeight = l 5 9 0
+viewerCenteringWidth = l 3 0 0
+viewerCenteringHeight = l 6 9 0
 viewerCenteringDepth = (foundationDepth / 2) + (l 40 0 0)
+viewerHorizontal = 45 @@ deg
+viewerVertical = 35 @@ deg
 
 lightCenteringWidth = l 3 0 0
 lightCenteringHeight = l 5 9 0
 lightCenteringDepth = l (foundationDepth / 2 + 20) 0 0
 
+beamSize = l 0 4 0
+beamLength = l 9 0 0
+beam = cube # scaleX beamLength . scaleZ beamSize . scaleY beamSize
+
+pillarToAlley = l 6 0 0
+pillarToPillar = l 12 0 0
 pillarSize = l 0 4 0
 pillarHeight = l 8 0 0
 pillar = cube # scaleX pillarSize . scaleZ pillarSize . scaleY pillarHeight
+pillarRow = mconcat [ mempty
+                    , skin beam # steelColor # translateY pillarHeight # translateX 0 # translateZ (foundationDepth / 2 - pillarSize)
+                    , skin beam # steelColor # translateY pillarHeight # translateX (-beamLength) # translateZ (foundationDepth / 2 - pillarSize)
+                    , skin pillar # steelColor # translateZ (foundationDepth / 2 - pillarSize)
+                    , skin pillar # steelColor # translateZ (foundationDepth / 2 - pillarSize) # translateX (foundationWidth / 2 - pillarSize)
+                    , skin pillar # steelColor # translateZ (foundationDepth / 2 - pillarSize) # translateX (-foundationWidth / 2)
+                    ]
+pillarRows = mconcat [ mempty
+                     , pillarRow
+                     , pillarRow # translateZ (-pillarToPillar)
+                     ]
+
+rafterCount = 20
+rafterWidth = l 0 1 0
+rafterHeight = l 0 3 0.5
+rafterLength = l 26 0 0
+rafterSpace = foundationWidth - (rafterCount * rafterWidth)
+rafterSpacing = rafterSpace / (rafterCount - 1)
+rafter = cube # scaleX rafterWidth . scaleY rafterHeight . scaleZ rafterLength
+rafters = mconcat [skin rafter # translateX (i * rafterWidth + (i - 1) * rafterSpacing) | i <- [0..rafterCount - 1]] # steelColor
+                  
+
+gatepostToAlley = l 2 0 0
+gatepostHeight = l 6 0 0
+gatepostSize = l 0 3 0.5
+gatepost = cube # scaleX gatepostSize . scaleZ gatepostSize . scaleY gatepostHeight
 
 
 (%) :: Int -> Int
@@ -40,7 +68,8 @@ pillar = cube # scaleX pillarSize . scaleZ pillarSize . scaleY pillarHeight
 l :: (Num a) => a -> a -> a -> a
 l feet inches fracInches = (feet * 12) + inches + fracInches
 
-cam = mm50Camera # translate (r3 (viewerCenteringWidth, viewerCenteringHeight, viewerCenteringDepth)) -- (2,2,10))
+cam = facing_ZCamera $ PerspectiveLens viewerHorizontal viewerVertical -- (10 @@ deg) (10 @@ deg)
+  --mm50Camera & verticalFieldOfView .~ (90 @@ deg)
 
 color :: Colour Double -> Diagram POVRay -> Diagram POVRay
 color c = diffuse 0.5 . ambient 0.1 . sc c
@@ -52,16 +81,26 @@ xy = direction . r3 $ (0, -200, 0)
 --light = parallelLight xy (sRGB 1 1 1)
 light = pointLight white
 
-foundation = cube # scaleX foundationWidth . scaleY (l 0 4 0) . scaleZ foundationDepth
+yard = cube # scaleX (foundationWidth + sidewalkWidth) . scaleY (l 0 4 0) . scaleZ foundationDepth
 --foundation = cube # scaleX 100.0 . scaleY  . scaleZ 100.0
 
+steelColor = color grey
+
+gateposts = mconcat [ skin gatepost # steelColor # translateZ (foundationDepth / 2 - gatepostSize)
+                    , skin gatepost # steelColor # translateZ (foundationDepth / 2 - gatepostSize) # translateX (foundationWidth / 2 - gatepostSize)
+                    , skin gatepost # steelColor # translateZ (foundationDepth / 2 - gatepostSize) # translateX (-foundationWidth / 2)
+                    ]
+            
 pergola :: QDiagram POVRay V3 Double Any
-pergola = centerXYZ $ cat unitX [ cam
-                                , skin foundation # color gray -- . translateX (foundationWidth / 2) . translateZ (foundationDepth / 2)
-                              --, skin (pillar # translateX (l 19 0 0)) # color (sRGB 1.0 0.0 0.0)
-                              --, skin (pillar) # color green
-                              --, skin (pillar # translateX (l 19 0 0)) # color blue
-                              , light # translateY 200
+--pergola = centerXYZ $ cat unitX [ mempty
+pergola = mconcat [ mempty                                
+                  , light # translateY (l 200 0 0) # translateZ (l 100 0 0)
+                  , cam # translate (r3 (viewerCenteringWidth, viewerCenteringHeight, viewerCenteringDepth)) # transform (aboutX (-10 @@ deg)) # transform (aboutY (10 @@ deg))
+                  , gateposts # translateX (-sidewalkWidth / 2) # translateZ (-gatepostToAlley)
+                  , rafters # translateX (-(sidewalkWidth + foundationWidth - rafterSpacing * 2) / 2) # translateY (pillarHeight + beamSize) # translateZ (-rafterLength / 2)
+                  , pillarRows # translateZ (-pillarToAlley) # translateX (-sidewalkWidth / 2)
+                  , skin yard # color gray # centerXYZ # alignY 0 # alignX 0 # alignZ 0
+
   ]
           --[skin sphere # color cyan, skin sphere # color green, skin sphere # color blue]
 

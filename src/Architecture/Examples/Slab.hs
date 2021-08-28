@@ -1,10 +1,3 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
-{-# LANGUAGE FlexibleContexts          #-}
-{-# LANGUAGE TypeFamilies              #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE PostfixOperators #-}
-
-
 module Architecture.Examples.Slab
   (
     slab
